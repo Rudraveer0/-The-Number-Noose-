@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>🔢 The Number Noose 🔢</title>
+  <style>
+    body {
+      background-color: black;
+      color: crimson;
+      font-family: "Courier New", monospace;
+      text-align: center;
+      padding: 20px;
+      user-select: none;
+      margin: 0;
+      overflow-x: hidden;
+    }
+    .hidden {
+      display: none;
+    }
+    button {
+      padding: 12px 25px;
+      font-size: 20px;
+      margin: 10px;
+      background-color: darkred;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: crimson;
+    }
+    button:disabled {
+      background-color: #660000;
+      cursor: not-allowed;
+    }
+    #sacrificeBtn {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 100;
+    }
+    #hangmanImg {
+      width: 300px;
+      height: auto;
+      margin-top: 20px;
+      border: 2px solid crimson;
+      border-radius: 10px;
+      background-color: #111;
+      transition: width 0.3s ease, height 0.3s ease;
+    }
+    #hangmanImg.jumpscare {
+      width: 800px;
+      height: 600px;
+    }
+    input[type="number"] {
+      padding: 10px;
+      font-size: 18px;
+      margin-top: 10px;
+      width: 150px;
+      background-color: #220000;
+      border: 2px solid crimson;
+      color: crimson;
+      border-radius: 5px;
+      text-align: center;
+    }
+    #message {
+      font-size: 20px;
+      margin-top: 20px;
+      line-height: 1.4;
+      white-space: pre-line;
+      min-height: 120px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      user-select: text;
+    }
+    #guesses {
+      color: gray;
+      margin-top: 10px;
+      min-height: 25px;
+      font-size: 18px;
+      user-select: text;
+    }
+    #gameScreen {
+      position: relative;
+      min-height: 600px;
+    }
+    #dayDisplay {
+      position: fixed;
+      top: 15px;
+      right: 20px;
+      font-size: 22px;
+      font-weight: bold;
+      color: crimson;
+      font-family: "Courier New", monospace;
+      user-select: none;
+      z-index: 200;
+      background-color: rgba(20, 0, 0, 0.7);
+      padding: 8px 15px;
+      border-radius: 10px;
+      border: 2px solid crimson;
+    }
+    #bookButton {
+      position: fixed;
+      top: 15px;
+      left: 20px;
+      width: 48px;
+      height: 48px;
+      background: crimson;
+      border-radius: 10px;
+      border: 2px solid #660000;
+      cursor: pointer;
+      box-shadow: 0 0 10px crimson;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      user-select: none;
+    }
+    #bookButton:hover {
+      background: #aa0000;
+      box-shadow: 0 0 15px #ff4444;
+    }
+    #bookIcon {
+      width: 24px;
+      height: 28px;
+      position: relative;
+    }
+    #bookIcon::before, #bookIcon::after {
+      content: "";
+      position: absolute;
+      background: #330000;
+      border: 2px solid crimson;
+      border-radius: 3px;
+      top: 0;
+      bottom: 0;
+      width: 12px;
+    }
+    #bookIcon::before {
+      left: 0;
+      transform: skewY(-10deg);
+    }
+    #bookIcon::after {
+      right: 0;
+      transform: skewY(10deg);
+    }
+    #journalBox {
+      position: fixed;
+      top: 80px;
+      left: 20px;
+      width: 320px;
+      max-height: 400px;
+      background: linear-gradient(145deg, #331111, #220000);
+      border: 3px solid crimson;
+      border-radius: 15px;
+      box-shadow: 0 0 15px crimson;
+      padding: 20px 25px;
+      color: #ffdddd;
+      font-family: "Georgia", serif;
+      font-style: italic;
+      text-align: left;
+      user-select: none;
+      line-height: 1.4;
+      overflow-y: auto;
+      display: none;
+    }
+    #journalBox h2 {
+      margin-top: 0;
+      font-weight: bold;
+      font-style: normal;
+      color: crimson;
+      margin-bottom: 12px;
+      border-bottom: 1px solid crimson;
+      padding-bottom: 6px;
+    }
+    #journalText {
+      white-space: pre-wrap;
+    }
+    #storyScreen button {
+      margin: 10px;
+    }
+    #storyJournalBox {
+      width: 80%;
+      max-width: 600px;
+      margin: 20px auto;
+      background: linear-gradient(145deg, #331111, #220000);
+      border: 3px solid crimson;
+      border-radius: 15px;
+      box-shadow: 0 0 15px crimson;
+      padding: 20px;
+      color: #ffdddd;
+      font-family: "Georgia", serif;
+      font-style: italic;
+      text-align: left;
+      line-height: 1.6;
+      user-select: text;
+      overflow-y: auto;
+      max-height: 400px;
+    }
+    #storyJournalBox h2 {
+      font-weight: bold;
+      font-style: normal;
+      color: crimson;
+      margin-bottom: 12px;
+      border-bottom: 1px solid crimson;
+      padding-bottom: 6px;
+    }
+    #storyJournalBox button {
+      display: inline-block;
+      margin: 10px 5px;
+      padding: 8px 15px;
+      font-size: 16px;
+    }
+    audio {
+      display: none;
+    }
+    #jumpscare {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 1000;
+      display: none;
+    }
+    #jumpscare img {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 800px;
+      height: 600px;
+      z-index: 1001;
+    }
+    .shake {
+      animation: shake 0.5s;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translate(0, 0); }
+      10%, 30%, 50%, 70%, 90% { transform: translate(-10px, 5px); }
+      20%, 40%, 60%, 80% { transform: translate(10px, -5px); }
+    }
+    #introScreen {
+      position: relative;
+      width: 800px;
+      height: 600px;
+      margin: 0 auto;
+      background: #111;
+      border: 2px solid crimson;
+      border-radius: 10px;
+    }
+    #villageCanvas {
+      width: 100%;
+      height: 100%;
+    }
+    #introInstructions {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: #ffdddd;
+      font-size: 16px;
+      font-family: "Georgia", serif;
+      font-style: italic;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 5px 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div id="mainScreen">
+    <h1>🔢 THE NUMBER NOOSE 🔢</h1>
+    <p><em>
+      A cursed number lies hidden between <strong>1 and 100</strong>.<br />
+      Can you guess it before the noose tightens?<br /><br />
+      Click <strong>Start</strong> if you dare...
+    </em></p>
+    <button id="startBtn">Start Game</button>
+  </div>
+
+  <div id="introScreen" class="hidden">
+    <div id="introInstructions">Use arrow keys to explore the village...</div>
+    <canvas id="villageCanvas"></canvas>
+  </div>
+
+  <div id="gameScreen" class="hidden">
+    <h1>🔢 THE NUMBER NOOSE 🔢</h1>
+    <input type="number" id="numberInput" placeholder="Your guess" min="1" max="100" autocomplete="off" />
+    <button id="guessBtn">Guess</button>
+    <br />
+    <img id="hangmanImg" src="0.png" alt="Hangman Stage" />
+    <div id="message"></div>
+    <div id="guesses"></div>
+    <div id="dayDisplay">Day 0</div>
+    <div id="bookButton" title="Toggle Journal">
+      <div id="bookIcon"></div>
+    </div>
+    <div id="journalBox">
+      <h2>Cursed Journal Entries</h2>
+      <div id="journalText">The cursed journal will appear here...</div>
+    </div>
+    <button id="sacrificeBtn">Sacrifice Day</button>
+    <div id="jumpscare" class="hidden">
+      <img src="jumpscare.png" alt="Jumpscare" />
+    </div>
+  </div>
+
+  <div id="endScreen" class="hidden">
+    <h1 id="endTitle"></h1>
+    <p id="endMessage" style="white-space: pre-line;"></p>
+    <button id="restartBtn">Play Again</button>
+    <button id="storyBtn" class="hidden">Read the Cursed Tale</button>
+  </div>
+
+  <div id="storyScreen" class="hidden">
+    <h1>🔢 The Cursed Tale 🔢</h1>
+    <div id="storyJournalBox">
+      <h2>Secret Journal Entries</h2>
+      <div id="storyJournalText"></div>
+    </div>
+    <button id="prevStoryBtn">Previous</button>
+    <button id="nextStoryBtn">Next</button>
+    <button id="exitStoryBtn">Return to Menu</button>
+  </div>
+
+  <audio id="bgm" src="horror.mp3" loop muted></audio>
+  <audio id="jumpscareAudio" src="jumpscare.mp3"></audio>
+  <audio id="screamAudio" src="scream.mp3"></audio>
+
+  <script>
+    localStorage.removeItem("storyHint");
+
+    let secretNumber;
+    let wrongAttempts;
+    let maxAttempts = 6;
+    let isGameOver;
+    let hasWon = localStorage.getItem("hasWon") === "true";
+    let hasSacrificed = false;
+    let currentStoryIndex = 0;
+    let storyChoices = JSON.parse(localStorage.getItem("storyChoices") || "{}");
+
+    const mainScreen = document.getElementById("mainScreen");
+    const introScreen = document.getElementById("introScreen");
+    const gameScreen = document.getElementById("gameScreen");
+    const endScreen = document.getElementById("endScreen");
+    const storyScreen = document.getElementById("storyScreen");
+    const startBtn = document.getElementById("startBtn");
+    const guessBtn = document.getElementById("guessBtn");
+    const sacrificeBtn = document.getElementById("sacrificeBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const storyBtn = document.getElementById("storyBtn");
+    const prevStoryBtn = document.getElementById("prevStoryBtn");
+    const nextStoryBtn = document.getElementById("nextStoryBtn");
+    const exitStoryBtn = document.getElementById("exitStoryBtn");
+    const input = document.getElementById("numberInput");
+    const message = document.getElementById("message");
+    const guesses = document.getElementById("guesses");
+    const hangmanImg = document.getElementById("hangmanImg");
+    const endTitle = document.getElementById("endTitle");
+    const endMessage = document.getElementById("endMessage");
+    const bgm = document.getElementById("bgm");
+    const dayDisplay = document.getElementById("dayDisplay");
+    const bookButton = document.getElementById("bookButton");
+    const journalBox = document.getElementById("journalBox");
+    const journalTextElem = document.getElementById("journalText");
+    const storyJournalText = document.getElementById("storyJournalText");
+    const screamAudio = document.getElementById("screamAudio");
+
+    let journalEntries = [
+      "I can feel something watching me.",
+      "The shadows whisper my name at night.",
+      "The noose tightens with every wrong move.",
+      "I hear footsteps but see no one.",
+      "My breath is shallow. I am running out of time.",
+      "If I fail again, I fear I will never leave.",
+      "I surrendered a day to the spirit, and it whispered a cursed truth..."
+    ];
+
+    const savedJournalEntries = JSON.parse(localStorage.getItem("storyJournalEntries") || "[]");
+    journalEntries = journalEntries.concat(savedJournalEntries);
+
+    const storyEntries = [
+      {
+        id: "entry1",
+        text: "The village was silent that night, save for the creak of the gallows. You find a journal buried beneath the old oak, its pages stained with something... not ink. Do you read the blood-stained page or burn it?",
+        choices: [
+          {
+            text: "Read",
+            action: () => {
+              localStorage.setItem("storyHint", "The number is a prime.");
+              journalEntries.push("The page spoke of prime numbers...");
+              localStorage.setItem("storyJournalEntries", JSON.stringify(journalEntries.slice(7)));
+              return "You read the page, and it speaks of a number that is prime...";
+            }
+          },
+          {
+            text: "Burn",
+            action: () => {
+              journalEntries.push("The ashes whispered of my cowardice...");
+              localStorage.setItem("storyJournalEntries", JSON.stringify(journalEntries.slice(7)));
+              return "The page burns, and the ashes whisper of your cowardice.";
+            }
+          }
+        ]
+      },
+      {
+        id: "entry2",
+        text: "The journal tells of a curse bound to a number no one dared utter. Those who guessed wrong vanished, their screams echoing in the wind. Do you search the gallows for clues or flee the village?",
+        choices: [
+          {
+            text: "Search",
+            action: () => {
+              journalEntries.push("The gallows revealed a truth...");
+              localStorage.setItem("storyJournalEntries", JSON.stringify(journalEntries.slice(7)));
+              return "You find carvings on the gallows, but they reveal no clear hint.";
+            }
+          },
+          {
+            text: "Flee",
+            action: () => {
+              journalEntries.push("I fled, but the curse followed me...");
+              localStorage.setItem("storyJournalEntries", JSON.stringify(journalEntries.slice(7)));
+              return "You flee, but the curse clings to you like a shadow.";
+            }
+          }
+        ]
+      },
+      {
+        id: "entry3",
+        text: "The spirit was once a scholar, obsessed with numbers. Betrayed, they bound their soul to this game, trapping others in their torment. Do you confront the spirit or study the journal further?",
+        choices: [
+          {
+            text: "Confront",
+            action: () => {
+              localStorage.setItem("storyHint", "The number is divisible by 3.");
+              journalEntries.push("The spirit whispered: 'Divisible by 3...'");
+              localStorage.setItem("storyJournalEntries", JSON.stringify(journalEntries.slice(7)));
+              return "The spirit appears, hissing: 'The number is divisible by 3.'";
+            }
+          },
+          {
+            text: "Study",
+            action: () => {
+              journalEntries.push("The journal's secrets weigh heavy on my soul...");
+              localStorage.setItem("storyJournalEntries", JSON.stringify(journalEntries.slice(7)));
+              return "You study the journal, but its secrets are heavy and unclear.";
+            }
+          }
+        ]
+      },
+      {
+        id: "entry4",
+        text: "Each correct guess weakens the curse, but it fights back, tightening the noose. There’s a way to end it: find the true number under a blood moon. Do you wait for the blood moon or challenge the curse now?",
+        choices: [
+          {
+            text: "Wait",
+            action: () => {
+              journalEntries.push("I waited for the blood moon, and the curse revealed a final secret...");
+              localStorage.setItem("storyJournalEntries", JSON.stringify(journalEntries.slice(7)));
+              return "You wait for the blood moon, and the curse reveals a final secret in the journal...";
+            }
+          },
+          {
+            text: "Challenge",
+            action: () => {
+              journalEntries.push("I challenged the curse, and it laughed...");
+              localStorage.setItem("storyJournalEntries", JSON.stringify(journalEntries.slice(7)));
+              return "You challenge the curse, but it laughs at your defiance.";
+            }
+          }
+        ]
+      }
+    ];
+
+    const hintMessages = [
+      `The spirit hisses: 'The number lurks below 50...'`,
+      `The spirit hisses: 'The number dwells above 50...'`,
+      `The spirit whispers: 'It ends in an odd digit...'`,
+      `The spirit whispers: 'It ends in an even digit...'`,
+      `The spirit murmurs: 'The number is divisible by 3...'`,
+      `The spirit murmurs: 'The number is not divisible by 5...'`
+    ];
+
+    // 2D Village Exploration Intro
+    const canvas = document.getElementById("villageCanvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = 800;
+    canvas.height = 600;
+
+    const tileSize = 40;
+    const map = [
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 1],
+      [1, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    ];
+
+    const player = {
+      x: 2 * tileSize,
+      y: 12 * tileSize,
+      width: 32,
+      height: 32,
+      speed: 2
+    };
+
+    const ghost = {
+      x: 10 * tileSize,
+      y: 3 * tileSize,
+      width: 32,
+      height: 32,
+      speed: 1,
+      active: false
+    };
+
+    let keys = {};
+    let introActive = false;
+
+    function drawVillage() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw map
+      for (let y = 0; y < map.length; y++) {
+        for (let x = 0; x < map[y].length; x++) {
+          if (map[y][x] === 1) {
+            ctx.fillStyle = "#333"; // Walls (village boundary)
+            ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+          } else if (map[y][x] === 2) {
+            ctx.fillStyle = "#555"; // Trees
+            ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+          } else if (map[y][x] === 3) {
+            ctx.fillStyle = "#777"; // Gallows
+            ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+          } else {
+            ctx.fillStyle = "#222"; // Ground
+            ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+          }
+        }
+      }
+
+      // Draw player (boy)
+      ctx.fillStyle = "blue";
+      ctx.fillRect(player.x, player.y, player.width, player.height);
+
+      // Draw ghost
+      if (ghost.active) {
+        ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+        ctx.fillRect(ghost.x, ghost.y, ghost.width, ghost.height);
+      }
+    }
+
+    function updateVillage() {
+      // Player movement
+      let newX = player.x;
+      let newY = player.y;
+
+      if (keys["ArrowUp"]) newY -= player.speed;
+      if (keys["ArrowDown"]) newY += player.speed;
+      if (keys["ArrowLeft"]) newX -= player.speed;
+      if (keys["ArrowRight"]) newX += player.speed;
+
+      // Collision detection
+      const tileX = Math.floor(newX / tileSize);
+      const tileY = Math.floor(newY / tileSize);
+      const tileX2 = Math.floor((newX + player.width - 1) / tileSize);
+      const tileY2 = Math.floor((newY + player.height - 1) / tileSize);
+
+      if (
+        map[tileY][tileX] === 0 &&
+        map[tileY][tileX2] === 0 &&
+        map[tileY2][tileX] === 0 &&
+        map[tileY2][tileX2] === 0
+      ) {
+        player.x = newX;
+        player.y = newY;
+      }
+
+      // Check proximity to gallows (tile 3)
+      const playerTileX = Math.floor(player.x / tileSize);
+      const playerTileY = Math.floor(player.y / tileSize);
+      if (map[playerTileY][playerTileX] === 3 || (playerTileX === 6 && playerTileY <= 4)) {
+        ghost.active = true;
+      }
+
+      // Ghost movement
+      if (ghost.active) {
+        const dx = player.x - ghost.x;
+        const dy = player.y - ghost.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance > 5) {
+          ghost.x += (dx / distance) * ghost.speed;
+          ghost.y += (dy / distance) * ghost.speed;
+        }
+
+        // Collision with ghost
+        if (
+          distance < player.width &&
+          introActive
+        ) {
+          introActive = false;
+          screamAudio.play().catch(() => console.log("Failed to play scream audio"));
+          // Fade out effect
+          introScreen.style.transition = "opacity 1s";
+          introScreen.style.opacity = "0";
+          setTimeout(() => {
+            introScreen.classList.add("hidden");
+            startGame();
+          }, 1000);
+        }
+      }
+
+      drawVillage();
+      if (introActive) requestAnimationFrame(updateVillage);
+    }
+
+    function startIntro() {
+      introActive = true;
+      player.x = 2 * tileSize;
+      player.y = 12 * tileSize;
+      ghost.x = 10 * tileSize;
+      ghost.y = 3 * tileSize;
+      ghost.active = false;
+      introScreen.style.opacity = "1";
+      mainScreen.classList.add("hidden");
+      introScreen.classList.remove("hidden");
+      gameScreen.classList.add("hidden");
+      endScreen.classList.add("hidden");
+      storyScreen.classList.add("hidden");
+      drawVillage();
+      updateVillage();
+      bgm.muted = false;
+      bgm.play().catch(() => {});
+    }
+
+    window.addEventListener("keydown", (e) => {
+      keys[e.key] = true;
+    });
+    window.addEventListener("keyup", (e) => {
+      keys[e.key] = false;
+    });
+
+    function playVoice(file) {
+      if (!file) return;
+      const audio = new Audio(file);
+      audio.play().catch(() => console.log(`Failed to play ${file}`));
+    }
+
+    function triggerJumpscare() {
+      const jumpscareDiv = document.getElementById("jumpscare");
+      const jumpscareImg = jumpscareDiv.querySelector("img");
+      const jumpscareAudio = document.getElementById("jumpscareAudio");
+      const gameScreen = document.getElementById("gameScreen");
+
+      jumpscareImg.onerror = () => {
+        console.error("Failed to load jumpscare image. Check if 'jumpscare.png' exists in the correct directory.");
+      };
+      jumpscareImg.onload = () => {
+        console.log("Jumpscare image loaded successfully.");
+      };
+
+      const originalHangmanSrc = hangmanImg.src;
+      hangmanImg.src = "jumpscare.png";
+      hangmanImg.classList.add("jumpscare");
+
+      jumpscareDiv.style.display = "block";
+      console.log("Jumpscare triggered: Setting display to block");
+      gameScreen.classList.add("shake");
+      jumpscareAudio.play().catch(() => console.log("Failed to play jumpscare audio"));
+
+      setTimeout(() => {
+        hangmanImg.src = originalHangmanSrc;
+        hangmanImg.classList.remove("jumpscare");
+
+        jumpscareDiv.style.display = "none";
+        console.log("Jumpscare ended: Setting display to none");
+        gameScreen.classList.remove("shake");
+      }, 2000);
+    }
+
+    function startGame() {
+      secretNumber = Math.floor(Math.random() * 100) + 1;
+      wrongAttempts = 0;
+      isGameOver = false;
+      hasSacrificed = false;
+      input.value = "";
+      input.disabled = false;
+      sacrificeBtn.disabled = false;
+      message.textContent = `🎙️ The spirit whispers: "Guess the cursed number..."`;
+      const storyHint = localStorage.getItem("storyHint");
+      if (storyHint) {
+        message.textContent += `\nA memory from the journal: "${storyHint}"`;
+      }
+      guesses.textContent = "";
+      hangmanImg.src = "0.png";
+      hangmanImg.classList.remove("jumpscare");
+      dayDisplay.textContent = "Day 0";
+      journalTextElem.textContent = "The cursed journal will appear here...";
+      journalBox.style.display = "none";
+      introScreen.classList.add("hidden");
+      gameScreen.classList.remove("hidden");
+      endScreen.classList.add("hidden");
+      storyScreen.classList.add("hidden");
+      input.focus();
+      bgm.muted = false;
+      bgm.play().catch(() => {});
+    }
+
+    function endGame(win) {
+      isGameOver = true;
+      input.disabled = true;
+      sacrificeBtn.disabled = true;
+      gameScreen.classList.add("hidden");
+      endScreen.classList.remove("hidden");
+      input.value = "";
+      dayDisplay.textContent = "";
+      journalBox.style.display = "none";
+
+      if (win) {
+        hasWon = true;
+        localStorage.setItem("hasWon", "true");
+        endTitle.textContent = "🎉 You Survived! 🎉";
+        endMessage.textContent =
+          `The spirit gasps... "You guessed it. You may leave... for now..."\n\nA secret tale has been unlocked...`;
+        storyBtn.classList.remove("hidden");
+        playVoice("correct.mp3");
+      } else {
+        triggerJumpscare();
+        setTimeout(() => {
+          endTitle.textContent = "💀 You Have Been Hanged 💀";
+          endMessage.textContent = `The cursed number was ${secretNumber}.\nYour fate is sealed.`;
+          playVoice("lose.mp3");
+        }, 2200);
+      }
+    }
+
+    function makeGuess() {
+      if (isGameOver) return;
+      guessBtn.disabled = true;
+      const guess = parseInt(input.value);
+      if (isNaN(guess) || guess < 1 || guess > 100) {
+        message.textContent =
+          "🎙️ The spirit whispers: 'Pick a number between 1 and 100...'";
+        playVoice("invalid.mp3");
+        input.value = "";
+        guessBtn.disabled = false;
+        return;
+      }
+      if (guess === secretNumber) {
+        hangmanImg.src = `${wrongAttempts}.png`;
+        hangmanImg.classList.remove("jumpscare");
+        message.textContent =
+          '🎙️ The spirit gasps... "You may leave... for now..."';
+        dayDisplay.textContent = "";
+        journalBox.style.display = "none";
+        endGame(true);
+      } else {
+        wrongAttempts++;
+        guesses.textContent += guess + " ";
+        hangmanImg.src = `${wrongAttempts}.png`;
+        hangmanImg.classList.remove("jumpscare");
+        if (wrongAttempts >= maxAttempts) {
+          hangmanImg.src = "7.png";
+          message.textContent = "";
+          dayDisplay.textContent = "";
+          journalBox.style.display = "none";
+          input.disabled = true;
+          sacrificeBtn.disabled = true;
+          setTimeout(() => {
+            endGame(false);
+          }, 1500);
+        } else {
+          dayDisplay.textContent = `Day ${wrongAttempts}`;
+          if (journalBox.style.display === "block" && !hasSacrificed) {
+            journalTextElem.textContent = journalEntries[wrongAttempts - 1] || "The journal is silent...";
+          }
+          const hint =
+            guess > secretNumber
+              ? "Too high... the noose tightens."
+              : "Too low... the shadows laugh.";
+          message.textContent = `🎙️ ${hint}\n\nWrong guesses: ${wrongAttempts} / ${maxAttempts}`;
+          playVoice(guess > secretNumber ? "toohigh.mp3" : "toolow.mp3");
+          if (wrongAttempts === 5) {
+            const jumpscareAudio = document.getElementById("jumpscareAudio");
+            const gameScreen = document.getElementById("gameScreen");
+            const originalHangmanSrc = hangmanImg.src;
+            hangmanImg.src = "jumpscare.png";
+            hangmanImg.classList.add("jumpscare");
+            gameScreen.classList.add("shake");
+            jumpscareAudio.play().catch(() => console.log("Failed to play jumpscare audio"));
+            setTimeout(() => {
+              hangmanImg.src = originalHangmanSrc;
+              hangmanImg.classList.remove("jumpscare");
+              gameScreen.classList.remove("shake");
+            }, 500);
+          }
+          if (wrongAttempts >= maxAttempts - 1) {
+            sacrificeBtn.disabled = true;
+          }
+        }
+      }
+      input.value = "";
+      input.focus();
+      guessBtn.disabled = false;
+    }
+
+    function sacrificeDay() {
+      if (isGameOver || hasSacrificed || wrongAttempts >= maxAttempts - 1) return;
+      hasSacrificed = true;
+      sacrificeBtn.disabled = true;
+      wrongAttempts++;
+      hangmanImg.src = `${wrongAttempts}.png`;
+      hangmanImg.classList.remove("jumpscare");
+      dayDisplay.textContent = `Day ${wrongAttempts}`;
+      
+      const hintIndex = Math.floor(Math.random() * hintMessages.length);
+      message.textContent = `🎙️ ${hintMessages[hintIndex]}\n\nWrong guesses: ${wrongAttempts} / ${maxAttempts}`;
+      
+      if (journalBox.style.display === "block") {
+        journalTextElem.textContent = journalEntries[6];
+      }
+      
+      if (wrongAttempts >= maxAttempts) {
+        hangmanImg.src = "7.png";
+        message.textContent = "";
+        dayDisplay.textContent = "";
+        journalBox.style.display = "none";
+        input.disabled = true;
+        sacrificeBtn.disabled = true;
+        setTimeout(() => {
+          endGame(false);
+        }, 1500);
+      } else {
+        playVoice("toohigh.mp3");
+      }
+      
+      input.focus();
+    }
+
+    bookButton.addEventListener("click", () => {
+      if (journalBox.style.display === "block") {
+        journalBox.style.display = "none";
+      } else {
+        if (hasSacrificed) {
+          journalTextElem.textContent = journalEntries[6];
+        } else if (wrongAttempts > 0 && wrongAttempts <= maxAttempts) {
+          journalTextElem.textContent = journalEntries[wrongAttempts - 1] || "The journal is silent...";
+        } else {
+          journalTextElem.textContent = "The cursed journal will appear here...";
+        }
+        journalBox.style.display = "block";
+      }
+    });
+
+    function enterStoryMode() {
+      if (!hasWon) return;
+      currentStoryIndex = 0;
+      endScreen.classList.add("hidden");
+      storyScreen.classList.remove("hidden");
+      updateStoryJournal();
+      bgm.muted = false;
+      bgm.play().catch(() => {});
+    }
+
+    function updateStoryJournal() {
+      const entry = storyEntries[currentStoryIndex];
+      if (storyChoices[entry.id]) {
+        storyJournalText.innerHTML = storyChoices[entry.id].result;
+        prevStoryBtn.disabled = currentStoryIndex === 0;
+        nextStoryBtn.disabled = currentStoryIndex === storyEntries.length - 1;
+      } else {
+        storyJournalText.innerHTML = `${entry.text}<br><br>${entry.choices
+          .map((c, i) => `<button onclick="makeStoryChoice(${i})">${c.text}</button>`)
+          .join("")}`;
+        prevStoryBtn.disabled = currentStoryIndex === 0;
+        nextStoryBtn.disabled = true;
+      }
+    }
+
+    function makeStoryChoice(choiceIndex) {
+      const entry = storyEntries[currentStoryIndex];
+      const choice = entry.choices[choiceIndex];
+      const result = choice.action();
+      storyChoices[entry.id] = { choice: choice.text, result };
+      localStorage.setItem("storyChoices", JSON.stringify(storyChoices));
+      storyJournalText.innerHTML = result;
+      nextStoryBtn.disabled = currentStoryIndex === storyEntries.length - 1;
+      if (currentStoryIndex < storyEntries.length - 1) {
+        nextStoryBtn.disabled = false;
+      }
+    }
+
+    startBtn.addEventListener("click", startIntro);
+    guessBtn.addEventListener("click", makeGuess);
+    sacrificeBtn.addEventListener("click", sacrificeDay);
+    restartBtn.addEventListener("click", startIntro);
+    storyBtn.addEventListener("click", enterStoryMode);
+    prevStoryBtn.addEventListener("click", () => {
+      if (currentStoryIndex > 0) {
+        currentStoryIndex--;
+        updateStoryJournal();
+      }
+    });
+    nextStoryBtn.addEventListener("click", () => {
+      if (currentStoryIndex < storyEntries.length - 1) {
+        currentStoryIndex++;
+        updateStoryJournal();
+      }
+    });
+    exitStoryBtn.addEventListener("click", () => {
+      storyScreen.classList.add("hidden");
+      mainScreen.classList.remove("hidden");
+    });
+
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        makeGuess();
+      }
+    });
+
+    document.body.addEventListener(
+      "click",
+      function () {
+        bgm.muted = false;
+        bgm.play().catch(() => {});
+      },
+      { once: true }
+    );
+
+    if (hasWon) {
+      storyBtn.classList.remove("hidden");
+    }
+  </script>
+</body>
+</html>
