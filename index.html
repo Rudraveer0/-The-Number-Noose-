@@ -255,6 +255,7 @@
     #villageCanvas {
       width: 100%;
       height: 100%;
+      image-rendering: pixelated;
     }
     #introInstructions {
       position: absolute;
@@ -276,13 +277,13 @@
     <p><em>
       A cursed number lies hidden between <strong>1 and 100</strong>.<br />
       Can you guess it before the noose tightens?<br /><br />
-      Click <strong>Start</strong> if you dare...
+      Click <strong>Start</strong> to explore the cursed village...
     </em></p>
     <button id="startBtn">Start Game</button>
   </div>
 
   <div id="introScreen" class="hidden">
-    <div id="introInstructions">Use arrow keys to explore the village...</div>
+    <div id="introInstructions">Use arrow keys to explore the village. Find the house to enter...</div>
     <canvas id="villageCanvas"></canvas>
   </div>
 
@@ -302,10 +303,10 @@
       <h2>Cursed Journal Entries</h2>
       <div id="journalText">The cursed journal will appear here...</div>
     </div>
-    <button id="sacrificeBtn">Sacrifice Day</button>
     <div id="jumpscare" class="hidden">
       <img src="jumpscare.png" alt="Jumpscare" />
     </div>
+    <button id="sacrificeBtn">Sacrifice Day</button>
   </div>
 
   <div id="endScreen" class="hidden">
@@ -371,7 +372,7 @@
 
     let journalEntries = [
       "I can feel something watching me.",
-      "The shadows whisper my name at night.",
+      "The shadows whisper my name at night!",
       "The noose tightens with every wrong move.",
       "I hear footsteps but see no one.",
       "My breath is shallow. I am running out of time.",
@@ -491,23 +492,36 @@
     canvas.height = 600;
 
     const tileSize = 40;
-    const map = [
+    const villageMap = [
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 1],
+      [1, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 1],
+      [1, 0, 4, 5, 4, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [1, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
       [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 1],
-      [1, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 4, 5, 4, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 2, 0, 1],
       [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
       [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     ];
+
+    const houseMap = [
+      [1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 6, 6, 6, 6, 6, 6, 1],
+      [1, 6, 6, 6, 6, 6, 6, 1],
+      [1, 6, 6, 6, 6, 6, 6, 1],
+      [1, 6, 6, 6, 6, 6, 6, 1],
+      [1, 6, 6, 6, 6, 6, 5, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1]
+    ];
+
+    let currentMap = villageMap;
+    let isInHouse = false;
 
     const player = {
       x: 2 * tileSize,
@@ -532,34 +546,137 @@
     function drawVillage() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Draw map
-      for (let y = 0; y < map.length; y++) {
-        for (let x = 0; x < map[y].length; x++) {
-          if (map[y][x] === 1) {
-            ctx.fillStyle = "#333"; // Walls (village boundary)
+      // Draw map with Minecraft-inspired textures
+      for (let y = 0; y < currentMap.length; y++) {
+        for (let x = 0; x < currentMap[y].length; x++) {
+          ctx.strokeStyle = "#333";
+          ctx.lineWidth = 2;
+          if (currentMap[y][x] === 1) {
+            // Cobblestone wall
+            ctx.fillStyle = "#7c7c7c";
             ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
-          } else if (map[y][x] === 2) {
-            ctx.fillStyle = "#555"; // Trees
+            ctx.fillStyle = "#636363";
+            for (let i = 0; i < 4; i++) {
+              for (let j = 0; j < 4; j++) {
+                ctx.fillRect(
+                  x * tileSize + i * (tileSize / 4) + 2,
+                  y * tileSize + j * (tileSize / 4) + 2,
+                  tileSize / 4 - 4,
+                  tileSize / 4 - 4
+                );
+              }
+            }
+            ctx.strokeRect(x * tileSize, y * tileSize, tileSize, tileSize);
+          } else if (currentMap[y][x] === 2) {
+            // Oak tree (log and leaves)
+            ctx.fillStyle = "#4a3728"; // Log
             ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
-          } else if (map[y][x] === 3) {
-            ctx.fillStyle = "#777"; // Gallows
+            ctx.fillStyle = "#2a662a"; // Leaves
+            ctx.beginPath();
+            ctx.arc(x * tileSize + tileSize / 2, y * tileSize + tileSize / 2, tileSize / 2.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeRect(x * tileSize, y * tileSize, tileSize, tileSize);
+          } else if (currentMap[y][x] === 3) {
+            // Gallows (wooden structure)
+            ctx.fillStyle = "#8b6f47"; // Oak planks
             ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+            ctx.beginPath();
+            ctx.moveTo(x * tileSize + tileSize / 4, y * tileSize + tileSize);
+            ctx.lineTo(x * tileSize + tileSize / 4, y * tileSize + tileSize / 4);
+            ctx.lineTo(x * tileSize + 3 * tileSize / 4, y * tileSize + tileSize / 4);
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            ctx.strokeRect(x * tileSize, y * tileSize, tileSize, tileSize);
+          } else if (currentMap[y][x] === 4) {
+            // House walls (oak planks)
+            ctx.fillStyle = "#8b6f47";
+            ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+            ctx.fillStyle = "#72583c";
+            for (let i = 0; i < tileSize; i += 4) {
+              ctx.fillRect(x * tileSize, y * tileSize + i, tileSize, 2);
+            }
+            ctx.strokeRect(x * tileSize, y * tileSize, tileSize, tileSize);
+          } else if (currentMap[y][x] === 5) {
+            // Oak door
+            ctx.fillStyle = "#5c4033";
+            ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+            ctx.fillStyle = "#4a3728";
+            ctx.fillRect(x * tileSize + tileSize / 4, y * tileSize + tileSize / 8, tileSize / 2, tileSize / 4);
+            ctx.fillRect(x * tileSize + tileSize / 4, y * tileSize + 5 * tileSize / 8, tileSize / 2, tileSize / 4);
+            ctx.beginPath();
+            ctx.arc(x * tileSize + tileSize - 10, y * tileSize + tileSize / 2, 5, 0, Math.PI * 2);
+            ctx.fillStyle = "#b8860b";
+            ctx.fill();
+            ctx.strokeRect(x * tileSize, y * tileSize, tileSize, tileSize);
+          } else if (currentMap[y][x] === 6) {
+            // House interior (dark oak floor)
+            ctx.fillStyle = "#4a3728";
+            ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+            ctx.fillStyle = "#3c2f2f";
+            for (let i = 0; i < 4; i++) {
+              for (let j = 0; j < 4; j++) {
+                ctx.fillRect(
+                  x * tileSize + i * (tileSize / 4) + 2,
+                  y * tileSize + j * (tileSize / 4) + 2,
+                  tileSize / 4 - 4,
+                  tileSize / 4 - 4
+                );
+              }
+            }
+            ctx.strokeRect(x * tileSize, y * tileSize, tileSize, tileSize);
           } else {
-            ctx.fillStyle = "#222"; // Ground
+            // Grass path
+            ctx.fillStyle = "#567d46";
             ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+            ctx.fillStyle = "#3c5f2f";
+            ctx.beginPath();
+            ctx.moveTo(x * tileSize, y * tileSize);
+            ctx.lineTo(x * tileSize + tileSize, y * tileSize + tileSize);
+            ctx.moveTo(x * tileSize + tileSize, y * tileSize);
+            ctx.lineTo(x * tileSize, y * tileSize + tileSize);
+            ctx.strokeStyle = "#3c5f2f";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.strokeRect(x * tileSize, y * tileSize, tileSize, tileSize);
           }
         }
       }
 
-      // Draw player (boy)
-      ctx.fillStyle = "blue";
+      // Draw player (Minecraft villager-like)
+      ctx.fillStyle = "#8b5a2b"; // Brown robe
       ctx.fillRect(player.x, player.y, player.width, player.height);
+      ctx.fillStyle = "#deb887"; // Skin tone for face
+      ctx.fillRect(player.x + player.width / 4, player.y + player.height / 4, player.width / 2, player.height / 4);
+      ctx.fillStyle = "#000000";
+      ctx.fillRect(player.x + player.width / 3, player.y + player.height / 3, player.width / 6, player.height / 12); // Eyes
+      ctx.fillRect(player.x + player.width / 2, player.y + player.height / 3, player.width / 6, player.height / 12);
 
-      // Draw ghost
-      if (ghost.active) {
+      // Draw ghost (Minecraft ghost-like)
+      if (ghost.active && !isInHouse) {
         ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
         ctx.fillRect(ghost.x, ghost.y, ghost.width, ghost.height);
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(ghost.x + ghost.width / 4, ghost.y + ghost.height / 3, ghost.width / 4, ghost.height / 6); // Eyes
+        ctx.fillRect(ghost.x + ghost.width / 2, ghost.y + ghost.height / 3, ghost.width / 4, ghost.height / 6);
       }
+    }
+
+    function isNearDoor(y, x) {
+      const adjacent = [
+        [y - 1, x],
+        [y + 1, x],
+        [y, x - 1],
+        [y, x + 1]
+      ];
+      for (const [ay, ax] of adjacent) {
+        if (ay >= 0 && ay < currentMap.length && ax >= 0 && ax < currentMap[0].length) {
+          if (currentMap[ay][ax] === 5) {
+            return true;
+          }
+        }
+      }
+      return false;
     }
 
     function updateVillage() {
@@ -578,25 +695,92 @@
       const tileX2 = Math.floor((newX + player.width - 1) / tileSize);
       const tileY2 = Math.floor((newY + player.height - 1) / tileSize);
 
-      if (
-        map[tileY][tileX] === 0 &&
-        map[tileY][tileX2] === 0 &&
-        map[tileY2][tileX] === 0 &&
-        map[tileY2][tileX2] === 0
-      ) {
-        player.x = newX;
-        player.y = newY;
+      // Allow movement if none of the corners are on walls (1 or 4, unless adjacent to door)
+      let canMove = true;
+      const corners = [
+        [tileY, tileX],
+        [tileY, tileX2],
+        [tileY2, tileX],
+        [tileY2, tileX2]
+      ];
+      for (const [y, x] of corners) {
+        if (y >= 0 && y < currentMap.length && x >= 0 && x < currentMap[0].length) {
+          if (currentMap[y][x] === 1 || (currentMap[y][x] === 4 && !isNearDoor(y, x))) {
+            canMove = false;
+            break;
+          }
+        } else {
+          canMove = false; // Out of bounds
+          break;
+        }
       }
 
-      // Check proximity to gallows (tile 3)
-      const playerTileX = Math.floor(player.x / tileSize);
-      const playerTileY = Math.floor(player.y / tileSize);
-      if (map[playerTileY][playerTileX] === 3 || (playerTileX === 6 && playerTileY <= 4)) {
+      if (canMove) {
+        player.x = newX;
+        player.y = newY;
+      } else {
+        console.log(`Collision blocked at tiles: [${tileY},${tileX}]=${currentMap[tileY][tileX]}, [${tileY},${tileX2}]=${currentMap[tileY][tileX2]}, [${tileY2},${tileX}]=${currentMap[tileY2][tileX]}, [${tileY2},${tileX2}]=${currentMap[tileY2][tileX2]}`);
+      }
+
+      // Check proximity to gallows (tile 3) in village
+      const playerTileX = Math.floor((player.x + player.width / 2) / tileSize);
+      const playerTileY = Math.floor((player.y + player.height / 2) / tileSize);
+      if (!isInHouse && (currentMap[playerTileY][playerTileX] === 3 || (playerTileX === 6 && playerTileY <= 4))) {
         ghost.active = true;
       }
 
-      // Ghost movement
-      if (ghost.active) {
+      // Check for door (tile 5) to enter/exit house, expanded range
+      const checkTiles = [
+        [playerTileY, playerTileX],
+        [playerTileY - 1, playerTileX],
+        [playerTileY + 1, playerTileX],
+        [playerTileY, playerTileX - 1],
+        [playerTileY, playerTileX + 1],
+        [playerTileY - 1, playerTileX - 1],
+        [playerTileY - 1, playerTileX + 1],
+        [playerTileY + 1, playerTileX - 1],
+        [playerTileY + 1, playerTileX + 1]
+      ];
+      let doorFound = false;
+      for (const [y, x] of checkTiles) {
+        if (y >= 0 && y < currentMap.length && x >= 0 && x < currentMap[0].length) {
+          if (currentMap[y][x] === 5) {
+            doorFound = true;
+            console.log(`Door detected at [${y},${x}], player at [${playerTileY},${playerTileX}]`);
+            if (!isInHouse) {
+              // Enter house
+              isInHouse = true;
+              currentMap = houseMap;
+              player.x = 3 * tileSize;
+              player.y = 4 * tileSize;
+              ghost.active = false;
+              introScreen.style.transition = "opacity 1s";
+              introScreen.style.opacity = "0.5";
+              setTimeout(() => {
+                introScreen.style.opacity = "1";
+                drawVillage();
+              }, 500);
+            } else {
+              // Exit house to main game
+              introActive = false;
+              screamAudio.play().catch(() => console.log("Failed to play scream audio"));
+              introScreen.style.transition = "opacity 1s";
+              introScreen.style.opacity = "0";
+              setTimeout(() => {
+                introScreen.classList.add("hidden");
+                startGame();
+              }, 1000);
+            }
+            break;
+          }
+        }
+      }
+      if (!doorFound) {
+        console.log(`No door found, player at [${playerTileY},${playerTileX}]=${currentMap[playerTileY][playerTileX]}`);
+      }
+
+      // Ghost movement in village
+      if (ghost.active && !isInHouse) {
         const dx = player.x - ghost.x;
         const dy = player.y - ghost.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
@@ -606,13 +790,9 @@
         }
 
         // Collision with ghost
-        if (
-          distance < player.width &&
-          introActive
-        ) {
+        if (distance < player.width && introActive) {
           introActive = false;
           screamAudio.play().catch(() => console.log("Failed to play scream audio"));
-          // Fade out effect
           introScreen.style.transition = "opacity 1s";
           introScreen.style.opacity = "0";
           setTimeout(() => {
@@ -628,6 +808,8 @@
 
     function startIntro() {
       introActive = true;
+      isInHouse = false;
+      currentMap = villageMap;
       player.x = 2 * tileSize;
       player.y = 12 * tileSize;
       ghost.x = 10 * tileSize;
@@ -667,7 +849,7 @@
       jumpscareImg.onerror = () => {
         console.error("Failed to load jumpscare image. Check if 'jumpscare.png' exists in the correct directory.");
       };
-      jumpscareImg.onload = () => {
+      jumpscareImg.onload = ()  => {
         console.log("Jumpscare image loaded successfully.");
       };
 
@@ -924,7 +1106,7 @@
       mainScreen.classList.remove("hidden");
     });
 
-    input.addEventListener("keydown", function (e) {
+    input.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         e.preventDefault();
         makeGuess();
